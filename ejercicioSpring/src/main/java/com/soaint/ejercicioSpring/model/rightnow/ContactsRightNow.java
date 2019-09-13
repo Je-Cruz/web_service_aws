@@ -1,11 +1,13 @@
 package com.soaint.ejercicioSpring.model.rightnow;
 
-/**
- * 
- */
 import java.util.ArrayList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class ContactsRightNow {
 	private Name name;
 	private Emails emails;

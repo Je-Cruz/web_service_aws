@@ -5,7 +5,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;

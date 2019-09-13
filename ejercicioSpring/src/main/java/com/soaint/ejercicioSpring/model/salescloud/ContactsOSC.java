@@ -3,6 +3,11 @@ package com.soaint.ejercicioSpring.model.salescloud;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class ContactsOSC {
 	@JsonProperty("FirstName")
 	private String firstName;
