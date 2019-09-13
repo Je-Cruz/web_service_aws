@@ -21,78 +21,54 @@ import com.soaint.ejercicioSpring.services.RightNow;
 import com.soaint.ejercicioSpring.services.SalesCloud;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 @RestController
 @RequestMapping("/conexion")
-public class EndPoint {
+public class EjemploController {
     
     RightNow rightNow = new RightNow();
     Eloqua eloqua = new Eloqua();
     SalesCloud salesCloud = new SalesCloud();
     UriReplace uriReplace = new UriReplace();
     
+    /**
+     * Conecta con las API de Oracle Service Cloud (Right Now), Eloqua, Oracle Sales Cloud.
+     * Comprueba si existe el contacto a través del email, obtiendo el id (RN, ELoqua) y el party number (OSC).
+     * En caso de que exista comprueba si tiene lead asociados, de ser así los elimina (solo en OSC),
+     * y posteriormente elimina el propio contacto. 
+     * @param email
+     * @return
+     * @throws ParseException
+     * @throws IOException
+     */
     @GetMapping("/delete/{email}")
     public ResponseEntity<String> delete(@PathVariable("email") String email) throws ParseException, IOException {
-     	String resultado = email + "<br>";
-     	int idRightNow = rightNow.getContactByEmail(email);
-     	int idEloqua = eloqua.getContactByEmail(email);
-     	ArrayList<Integer> idSalesCloud = salesCloud.getContactByEmail(email);
-     	
-     	if (idRightNow > 0) {
-     		rightNow.deleteContact(idRightNow);
-     		resultado += "ELIMINADO de Right Now<br>";
-     	} else {
-     		resultado += "No existe en Right Now<br>";
-     	}
-     	
-     	if (idEloqua > 0) {
-     		eloqua.deleteContact(idEloqua);
-     		resultado += "ELIMINADO de Eloqua<br>";
-     	} else {
-     		resultado += "No existe en Eloqua<br>";
-     	}
-     	
-     	if (!idSalesCloud.isEmpty()) {
-     		salesCloud.deleteLead(salesCloud.getLeadByContactPartyNumber(email));
-     		salesCloud.deleteContact(idSalesCloud);
-     		resultado += "ELIMINADO de Sales Cloud<br>";
-     	} else {
-     		resultado += "No existe en Sales Cloud<br>";
-     	}
-     	
+    	String resultado = rightNow.checkExistenceForDeleteByEmail(email)
+    			.concat(eloqua.checkExistenceForDeleteByEmail(email))
+    					.concat(salesCloud.checkExistenceForDeleteByEmail(email));
      	return new ResponseEntity<>(resultado, HttpStatus.OK);
     }
     
+    /**
+     * Conecta con las API de Oracle Service Cloud (Right Now), Eloqua, Oracle Sales Cloud.
+     * Comprueba si existe el contacto a través de un json, obtiendo el id (RN, ELoqua) y el party number (OSC).
+     * Si el contacto existe, comprueba si tiene un lead asociado (solo en OSC), en caso de no tenerlo, se crea un lead y se asocia al contacto.
+     * Si el contacto no existe, crea un contanto nuevo con los datos del json y además le crea y asocia un lead (solo en OSC).
+     * @param contactJson
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
-    public String createPerson(@RequestBody String person) throws  ClientProtocolException, IOException {
-    	String resultado = "";
-	    
-	    ObjectMapper om = new ObjectMapper();
-		JsonNode nodes = om.readTree(person).get("correo");
-		String email = uriReplace.JsonTransformer(nodes.asText());
-    	
-    	if (rightNow.getContactByEmail(email) > 0) {
-    		resultado += "Ya existe en Right Now<br>";
-     	} else {
-     		rightNow.postContactSave(person);
-     		resultado += "Creado en Right Now<br>";
-     	}
-     	
-     	if (eloqua.getContactByEmail(email) > 0) {
-     		resultado += "Ya existe en Eloqua<br>";
-     	} else {
-     		eloqua.postContactSave(person);
-     		resultado += "Creado en Eloqua<br>";
-     	}
-     	
-		if (!salesCloud.getContactByEmail(email).isEmpty()) {
-     		resultado += "Ya existe en Sales Cloud<br>";
-     	} else {
-     		salesCloud.postContactSave(person);
-     		salesCloud.postSalesLeadSave(email);
-     		resultado += "Creado en Sales Cloud<br>";
-     	}
-    	
-		return resultado;
+    public ResponseEntity<String> create(@RequestBody String contactJson) throws  ClientProtocolException, IOException {
+    	String resultado = rightNow.checkExistenceForCreateByJson(contactJson)
+    			.concat(eloqua.checkExistenceForCreateByJson(contactJson))
+    					.concat(salesCloud.checkExistenceForCreateByJson(contactJson));
+		return new ResponseEntity<>(resultado, HttpStatus.OK);
     }
     
 }

@@ -55,7 +55,7 @@ public class Eloqua {
 	}
 
 	// GET ID DE CONTACTS
-	public int getContactByEmail(String email) throws ClientProtocolException, IOException {
+	public int getContactIdByEmail(String email) throws ClientProtocolException, IOException {
 		HttpGet request = new HttpGet(QueryId(email));
         credential(request);
         try {
@@ -73,7 +73,7 @@ public class Eloqua {
 		HttpPost request = new HttpPost(PropertiesReader.urlEloqua() + PropertiesReader.postUrlEloqua());
         credential(request);
         StringEntity entity = new StringEntity(serializeContact(person),
-                ContentType.APPLICATION_JSON);        
+                ContentType.APPLICATION_JSON);
         HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
         System.out.println(response.getStatusLine().getStatusCode());
 	}
@@ -92,6 +92,28 @@ public class Eloqua {
 				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
 				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
 		return om.writeValueAsString(contact).toString();
+	}
+	
+	public String checkExistenceForDeleteByEmail (String email) throws ClientProtocolException, IOException {
+		int idEloqua = getContactIdByEmail(email);
+		if (idEloqua > 0) {
+     		deleteContact(idEloqua);
+     		return "ELIMINADO de Eloqua<br>";
+     	} else {
+     		return "No existe en Eloqua<br>";
+     	}
+	}
+	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
+    	ObjectMapper om = new ObjectMapper();
+		JsonNode nodes = om.readTree(contactJson).get("correo");
+		String email = uriReplace.JsonTransformer(nodes.asText());
+    	
+     	if (getContactIdByEmail(email) > 0) {
+     		return "Ya existe en Eloqua<br>";
+     	} else {
+     		postContactSave(contactJson);
+     		return "Creado en Eloqua<br>";
+     	}
 	}
     
 }

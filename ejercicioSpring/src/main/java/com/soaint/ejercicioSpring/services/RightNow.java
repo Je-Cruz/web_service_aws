@@ -47,7 +47,7 @@ public class RightNow {
 	//------------------------
 	
 	// GET ID DE CONTACTS
-	public int getContactByEmail(String email) {
+	public int getContactIdByEmail(String email) {
         HttpGet request = new HttpGet(QueryId(email));
         
         try {
@@ -85,5 +85,27 @@ public class RightNow {
 		ContactsRightNow contact = new ContactsRightNow(namern,emailsrn);
 		
 		return obj.writeValueAsString(contact).toString();
+	}
+	
+	public String checkExistenceForDeleteByEmail (String email) throws ClientProtocolException, IOException {
+		int idRightNow = getContactIdByEmail(email);
+		if (idRightNow > 0) {
+     		deleteContact(idRightNow);
+     		return "ELIMINADO de Right Now<br>";
+     	} else {
+     		return "No existe en Right Now<br>";
+     	}
+	}
+	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
+    	ObjectMapper om = new ObjectMapper();
+		JsonNode nodes = om.readTree(contactJson).get("correo");
+		String email = uriReplace.JsonTransformer(nodes.asText());
+    	
+    	if (getContactIdByEmail(email) > 0) {
+    		return "Ya existe en Right Now<br>";
+     	} else {
+     		postContactSave(contactJson);
+     		return "Creado en Right Now<br>";
+     	}
 	}
 }

@@ -72,8 +72,8 @@ public class SalesCloud {
 	}
 	//------------------------
 
-	// GET ID DE CONTACTS
-	public ArrayList<Integer> getContactByEmail(String email) throws ClientProtocolException, IOException {
+	// GET PARTY NUMBERS DE CONTACTS
+	public ArrayList<Integer> getContactPartyNumberByEmail(String email) throws ClientProtocolException, IOException {
 		HttpGet request = new HttpGet(QueryContactId(email));
 		credential(request);
 
@@ -129,8 +129,8 @@ public class SalesCloud {
 
 	// POST SAVE SALES LEAD
 	public void postSalesLeadSave(String email) throws ClientProtocolException, IOException {
-		int lenghtArrayList = getContactByEmail(email).size() - 1;
-		int lastPartyNumber = getContactByEmail(email).get(lenghtArrayList);
+		int lenghtArrayList = getContactPartyNumberByEmail(email).size() - 1;
+		int lastPartyNumber = getContactPartyNumberByEmail(email).get(lenghtArrayList);
 		HttpPost request = new HttpPost(UrlPostLead());
 		credential(request);
 		SalesLead salesCloudContact = new SalesLead(lastPartyNumber);
@@ -173,5 +173,45 @@ public class SalesCloud {
 		SalesLead contact = new SalesLead(actualObj.get("ContactPartyNumber").asInt());
 		return obj.writeValueAsString(contact).toString();
 	}
+	
+	public String checkExistenceForDeleteByEmail (String email) throws ClientProtocolException, IOException {
+		ArrayList<Integer> idSalesCloud = getContactPartyNumberByEmail(email);
+     	if (!idSalesCloud.isEmpty()) {
+     		deleteLead(getLeadByContactPartyNumber(email));
+     		deleteContact(idSalesCloud);
+     		return "ELIMINADO de Sales Cloud<br>";
+     	} else {
+     		return "No existe en Sales Cloud<br>";
+     	}
+	}
+	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
+    	ObjectMapper om = new ObjectMapper();
+		JsonNode nodes = om.readTree(contactJson).get("correo");
+		String email = uriReplace.JsonTransformer(nodes.asText());
+    	String leadExist = ", con Lead asociado";
+		if (!getContactPartyNumberByEmail(email).isEmpty()) {
+			//******
+			
+			
+			
+			if(getLeadByContactPartyNumber(email).isEmpty()) {
+				postSalesLeadSave(email);
+				leadExist = ", se crea y asocia Lead";
+			}
+			
+			
+			
+			
+			//******
+     		return "Ya existe en Sales Cloud"+ leadExist +"<br>";
+     	} else {
+     		postContactSave(contactJson);
+     		postSalesLeadSave(email);
+     		return "Creado en Sales Cloud y añadido Lead<br>";
+     	}
+	}
+	
+	
+	
 	
 }
