@@ -65,8 +65,7 @@ public class RightNow {
 		HttpPost request = new HttpPost(UrlPost());
         StringEntity entity = new StringEntity(serializeContact(person),
                 ContentType.APPLICATION_JSON);
-        HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
-        System.out.println(response.getStatusLine().getStatusCode());
+        connectionHttp.ConnectionResponse(request, entity);
 	}
 	
 	// DELETE CONTACT

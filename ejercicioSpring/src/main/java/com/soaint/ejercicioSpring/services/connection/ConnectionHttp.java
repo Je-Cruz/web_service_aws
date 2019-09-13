@@ -23,7 +23,6 @@ public class ConnectionHttp {
 	public String ConnectionResponse (HttpGet request) throws ClientProtocolException, IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 	    HttpResponse response = client.execute(request);
-	    System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 	    return EntityUtils.toString(response.getEntity()); 
 	}
 	// POST
@@ -36,6 +35,5 @@ public class ConnectionHttp {
 	public void ConnectionResponse (HttpDelete request) throws ClientProtocolException, IOException {
 		HttpClient client = HttpClientBuilder.create().build();
         HttpResponse response = client.execute(request);
-		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 	}
 }

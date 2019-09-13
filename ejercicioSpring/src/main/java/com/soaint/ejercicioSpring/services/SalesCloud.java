@@ -124,7 +124,6 @@ public class SalesCloud {
 		credential(request);
 		StringEntity entity = new StringEntity(serializeContact(person), ContentType.APPLICATION_JSON);
 		HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
-		System.out.println(response.getStatusLine().getStatusCode());
 	}
 
 	// POST SAVE SALES LEAD
@@ -137,8 +136,7 @@ public class SalesCloud {
 		ObjectMapper obj = new ObjectMapper();
 		String jsonLead = obj.writeValueAsString(salesCloudContact).toString();
 		StringEntity entity = new StringEntity(serializeLead(jsonLead), ContentType.APPLICATION_JSON);
-		HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
-		System.out.println(response.getStatusLine().getStatusCode());
+		connectionHttp.ConnectionResponse(request, entity);
 	}
 
 	// DELETE CONTACT
@@ -190,19 +188,10 @@ public class SalesCloud {
 		String email = uriReplace.JsonTransformer(nodes.asText());
     	String leadExist = ", con Lead asociado";
 		if (!getContactPartyNumberByEmail(email).isEmpty()) {
-			//******
-			
-			
-			
 			if(getLeadByContactPartyNumber(email).isEmpty()) {
 				postSalesLeadSave(email);
 				leadExist = ", se crea y asocia Lead";
 			}
-			
-			
-			
-			
-			//******
      		return "Ya existe en Sales Cloud"+ leadExist +"<br>";
      	} else {
      		postContactSave(contactJson);
@@ -210,8 +199,4 @@ public class SalesCloud {
      		return "Creado en Sales Cloud y añadido Lead<br>";
      	}
 	}
-	
-	
-	
-	
 }
