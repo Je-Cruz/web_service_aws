@@ -23,7 +23,7 @@ import com.soaint.ejercicioSpring.utils.UriReplace;
 
 @RestController
 @RequestMapping("/conexion")
-public class EjemploController {
+public class EndPoint {
     
     RightNow rightNow = new RightNow();
     Eloqua eloqua = new Eloqua();

@@ -1,5 +1,10 @@
 package com.soaint.ejercicioSpring.model.rightnow;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class Items {
 	private int id;
 

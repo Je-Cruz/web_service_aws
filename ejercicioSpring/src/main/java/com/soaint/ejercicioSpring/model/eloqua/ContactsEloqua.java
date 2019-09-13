@@ -2,6 +2,11 @@ package com.soaint.ejercicioSpring.model.eloqua;
 
 import java.util.ArrayList;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class ContactsEloqua {
 	private String firstName;
 	private String lastName;

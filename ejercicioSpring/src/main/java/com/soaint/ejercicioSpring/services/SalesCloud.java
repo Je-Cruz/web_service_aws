@@ -21,6 +21,11 @@ import com.soaint.ejercicioSpring.security.PropertiesReader;
 import com.soaint.ejercicioSpring.services.connection.ConnectionHttp;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class SalesCloud {
 
 	ConnectionHttp connectionHttp = new ConnectionHttp();
@@ -41,16 +46,18 @@ public class SalesCloud {
 		request.setHeader(HttpHeaders.AUTHORIZATION, PropertiesReader.getCredSalesCloud());
 		return request;
 	}
-
-	// QUERY DE SALES CLOUD
+	//------------------------
+	
+	// QUERYS DE SALES CLOUD
 	private String QueryContactId(String email) {
 		return PropertiesReader.urlSalesCloud().concat(PropertiesReader.getUrlQuerySalesCloud()).concat(email);
 	}
 	private String QueryLeadId(String email) {
 		return PropertiesReader.urlSalesCloud().concat(PropertiesReader.getUrlQuerySalesCloudLead()).concat(email);
 	}
+	//------------------------
 
-	// URL DE SALES CLOUD
+	// URLS DE SALES CLOUD
 	private String UrlGet(int id) {
 		return PropertiesReader.urlSalesCloud().concat(PropertiesReader.getUrlSalesCloud()) + id;
 	}
@@ -63,9 +70,9 @@ public class SalesCloud {
 	private String UrlPostLead() {
 		return PropertiesReader.urlSalesCloud().concat(PropertiesReader.urlSalesCloudLead());
 	}
-	///////////////////////////
+	//------------------------
 
-	// HTTP GET "OBJECT" request
+	// GET ID DE CONTACTS
 	public ArrayList<Integer> getContactByEmail(String email) throws ClientProtocolException, IOException {
 		HttpGet request = new HttpGet(QueryContactId(email));
 		credential(request);
@@ -88,7 +95,7 @@ public class SalesCloud {
 		}
 	}
 
-	// HTTP GET LEAD
+	// GET LEAD-ID DE SALES LEAD
 	public ArrayList<String> getLeadByContactPartyNumber(String email)
 			throws ClientProtocolException, IOException {
 
@@ -111,23 +118,7 @@ public class SalesCloud {
 		}
 	}
 
-	public String serializeContact(String person) throws IOException {
-		ObjectMapper obj = new ObjectMapper();
-		JsonNode actualObj = obj.readTree(person);
-		ContactsOSC contact = new ContactsOSC(uriReplace.JsonTransformer(actualObj.get("nombre").asText()), 
-				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
-				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
-		return obj.writeValueAsString(contact).toString();
-	}
-
-	public String serializeLead(String jsonLead) throws IOException {
-		ObjectMapper obj = new ObjectMapper();
-		JsonNode actualObj = obj.readTree(jsonLead);
-		SalesLead contact = new SalesLead(actualObj.get("ContactPartyNumber").asInt());
-		return obj.writeValueAsString(contact).toString();
-	}
-
-	// HTTP POST para crear contacto
+	// POST SAVE CONTACT
 	public void postContactSave(String person) throws UnsupportedCharsetException, IOException {
 		HttpPost request = new HttpPost(UrlPostContact());
 		credential(request);
@@ -136,29 +127,29 @@ public class SalesCloud {
 		System.out.println(response.getStatusLine().getStatusCode());
 	}
 
-	// HTTP POST para crear sales lead
+	// POST SAVE SALES LEAD
 	public void postSalesLeadSave(String email) throws ClientProtocolException, IOException {
 		int lenghtArrayList = getContactByEmail(email).size() - 1;
 		int lastPartyNumber = getContactByEmail(email).get(lenghtArrayList);
 		HttpPost request = new HttpPost(UrlPostLead());
 		credential(request);
-		ObjectMapper obj = new ObjectMapper();
 		SalesLead salesCloudContact = new SalesLead(lastPartyNumber);
+		ObjectMapper obj = new ObjectMapper();
 		String jsonLead = obj.writeValueAsString(salesCloudContact).toString();
 		StringEntity entity = new StringEntity(serializeLead(jsonLead), ContentType.APPLICATION_JSON);
 		HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
 		System.out.println(response.getStatusLine().getStatusCode());
 	}
 
-	// HTTP DELETE request
+	// DELETE CONTACT
 	public void deleteContact(ArrayList<Integer> partynumberarray) throws ClientProtocolException, IOException {
 		for (int i = 0; i < partynumberarray.size(); i++) {
 			HttpDelete request = new HttpDelete(UrlGet(partynumberarray.get(i)));
 			credential(request);
-
 			connectionHttp.ConnectionResponse(request);
 		}
 	}
+	// DELETE SALES LEAD
 	public void deleteLead(ArrayList<String> leadsIdArrayList) throws ClientProtocolException, IOException {
 		for (int i = 0; i < leadsIdArrayList.size(); i++) {
 			HttpDelete request = new HttpDelete(UrlGetLead(leadsIdArrayList.get(i)));
@@ -166,5 +157,21 @@ public class SalesCloud {
 			connectionHttp.ConnectionResponse(request);
 		}
 	}
-
+	
+	public String serializeContact(String person) throws IOException {
+		ObjectMapper obj = new ObjectMapper();
+		JsonNode actualObj = obj.readTree(person);
+		ContactsOSC contact = new ContactsOSC(uriReplace.JsonTransformer(actualObj.get("nombre").asText()), 
+				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
+				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
+		return obj.writeValueAsString(contact).toString();
+	}
+	
+	public String serializeLead(String jsonLead) throws IOException {
+		ObjectMapper obj = new ObjectMapper();
+		JsonNode actualObj = obj.readTree(jsonLead);
+		SalesLead contact = new SalesLead(actualObj.get("ContactPartyNumber").asInt());
+		return obj.writeValueAsString(contact).toString();
+	}
+	
 }

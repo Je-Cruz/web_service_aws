@@ -19,6 +19,11 @@ import com.soaint.ejercicioSpring.security.PropertiesReader;
 import com.soaint.ejercicioSpring.services.connection.ConnectionHttp;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class RightNow {
     
 	ConnectionHttp connectionHttp = new ConnectionHttp();
@@ -30,7 +35,7 @@ public class RightNow {
 				PropertiesReader.urlRightNow() + PropertiesReader.getUrlQueryRightNow() + "'" + email + "'";
 	}
 	
-	// URL DE ORACLE SERVICE CLOUD (RIGHT NOW)
+	// URLS DE ORACLE SERVICE CLOUD (RIGHT NOW)
 	private String UrlGet(int id) {
 		return "https://" + PropertiesReader.getCredRightNow() + "@" + 
 				PropertiesReader.urlRightNow() + PropertiesReader.getUrlRightNow() + id;
@@ -39,8 +44,9 @@ public class RightNow {
 		return "https://" + PropertiesReader.getCredRightNow() + "@" + 
 				PropertiesReader.urlRightNow() + PropertiesReader.postUrlRightNow();
 	}
-		
-	// HTTP GET "OBJECT" request
+	//------------------------
+	
+	// GET ID DE CONTACTS
 	public int getContactByEmail(String email) {
         HttpGet request = new HttpGet(QueryId(email));
         
@@ -54,6 +60,21 @@ public class RightNow {
         }
 	}
 	
+	// POST SAVE CONTACT
+	public void postContactSave(String person) throws ClientProtocolException, IOException {
+		HttpPost request = new HttpPost(UrlPost());
+        StringEntity entity = new StringEntity(serializeContact(person),
+                ContentType.APPLICATION_JSON);
+        HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
+        System.out.println(response.getStatusLine().getStatusCode());
+	}
+	
+	// DELETE CONTACT
+    public void deleteContact(int id) throws ClientProtocolException, IOException {
+    	HttpDelete request = new HttpDelete(UrlGet(id));
+        connectionHttp.ConnectionResponse(request);	
+    }
+    
 	public String serializeContact(String person) throws IOException {
 		ObjectMapper obj = new ObjectMapper();
 		JsonNode actualObj = obj.readTree(person);
@@ -65,20 +86,4 @@ public class RightNow {
 		
 		return obj.writeValueAsString(contact).toString();
 	}
-	
-	// HTTP POST para crear contacto
-	public void postContactSave(String person) throws ClientProtocolException, IOException {
-		HttpPost request = new HttpPost(UrlPost());
-        StringEntity entity = new StringEntity(serializeContact(person),
-                ContentType.APPLICATION_JSON);
-        HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
-        System.out.println(response.getStatusLine().getStatusCode());
-	}
-	
-	// HTTP DELETE request
-    public void deleteContact(int id) throws ClientProtocolException, IOException {
-    	HttpDelete request = new HttpDelete(UrlGet(id));
-        connectionHttp.ConnectionResponse(request);	
-    }
-    
 }

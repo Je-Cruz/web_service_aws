@@ -1,5 +1,8 @@
 package com.soaint.ejercicioSpring.model.rightnow;
 
+/**
+ * 
+ */
 import java.util.ArrayList;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

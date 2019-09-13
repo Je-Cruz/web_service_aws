@@ -3,6 +3,11 @@ package com.soaint.ejercicioSpring.model.salescloud.lead;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class SalesLead {
 	@JsonProperty("ContactPartyNumber")
 	private int contactPartyNumber;

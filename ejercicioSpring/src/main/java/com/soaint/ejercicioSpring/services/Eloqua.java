@@ -17,6 +17,11 @@ import com.soaint.ejercicioSpring.security.PropertiesReader;
 import com.soaint.ejercicioSpring.services.connection.ConnectionHttp;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class Eloqua {
 	
 	ConnectionHttp connectionHttp = new ConnectionHttp();
@@ -41,7 +46,6 @@ public class Eloqua {
     
 	// QUERY DE ELOQUA
     private String QueryId(String email) {
-    	
 		return PropertiesReader.urlEloqua() + PropertiesReader.getUrlQueryEloqua() + email;
 	}
     
@@ -49,9 +53,8 @@ public class Eloqua {
     private String UrlGet(int id) {
 		return PropertiesReader.urlEloqua() + PropertiesReader.getUrlEloqua() + id;
 	}
-	///////////////////////
 
-	// HTTP GET "OBJECT" request
+	// GET ID DE CONTACTS
 	public int getContactByEmail(String email) throws ClientProtocolException, IOException {
 		HttpGet request = new HttpGet(QueryId(email));
         credential(request);
@@ -63,16 +66,6 @@ public class Eloqua {
         }catch(Exception e) {
         	return 0;
         }
-	}
-    
-	
-	public String serializeContact(String person) throws IOException {
-		ObjectMapper om = new ObjectMapper();
-		JsonNode actualObj = om.readTree(person);
-		ContactsEloqua contact = new ContactsEloqua(uriReplace.JsonTransformer(actualObj.get("nombre").asText()),
-				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
-				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
-		return om.writeValueAsString(contact).toString();
 	}
 	
 	// HTTP POST para crear contacto
@@ -91,5 +84,14 @@ public class Eloqua {
         credential(request);
         connectionHttp.ConnectionResponse(request);
     }
+    
+	public String serializeContact(String person) throws IOException {
+		ObjectMapper om = new ObjectMapper();
+		JsonNode actualObj = om.readTree(person);
+		ContactsEloqua contact = new ContactsEloqua(uriReplace.JsonTransformer(actualObj.get("nombre").asText()),
+				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
+				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
+		return om.writeValueAsString(contact).toString();
+	}
     
 }

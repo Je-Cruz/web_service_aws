@@ -4,6 +4,11 @@ import java.util.ResourceBundle;
 
 import com.soaint.ejercicioSpring.utils.EncoderBase64;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class PropertiesReader {
 	private static final ResourceBundle PROPERTIES = ResourceBundle.getBundle("application");
 	// ORACLE RIGHT NOW *************************************

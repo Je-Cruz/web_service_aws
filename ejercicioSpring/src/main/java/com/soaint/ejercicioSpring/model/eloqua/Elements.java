@@ -1,5 +1,10 @@
 package com.soaint.ejercicioSpring.model.eloqua;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class Elements {
 	
 	private int id;

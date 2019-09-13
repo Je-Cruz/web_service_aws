@@ -1,5 +1,10 @@
 package com.soaint.ejercicioSpring.model.rightnow;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class Name {
 	private String first;
 	private String last;

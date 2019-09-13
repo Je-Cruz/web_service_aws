@@ -1,5 +1,10 @@
 package com.soaint.ejercicioSpring.model.rightnow;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class Emails {
 	private String address;
 	private AddressType addressType;

@@ -1,5 +1,10 @@
 package com.soaint.ejercicioSpring.utils;
 
+/**
+ * 
+ * @author jcruz
+ *
+ */
 public class UriReplace {
 	
 	public static String JsonTransformer(String jsonSend) {
