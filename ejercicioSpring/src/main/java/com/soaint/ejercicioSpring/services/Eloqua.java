@@ -46,12 +46,12 @@ public class Eloqua {
     
 	// QUERY DE ELOQUA
     private String QueryId(String email) {
-		return PropertiesReader.urlEloqua() + PropertiesReader.getUrlQueryEloqua() + email;
+		return PropertiesReader.urlEloqua().concat(PropertiesReader.getUrlQueryEloqua()).concat(email);
 	}
     
 	// URL DE ELOQUA
     private String UrlGet(int id) {
-		return PropertiesReader.urlEloqua() + PropertiesReader.getUrlEloqua() + id;
+		return PropertiesReader.urlEloqua().concat(PropertiesReader.getUrlEloqua()) + id;
 	}
 
 	// GET ID DE CONTACTS

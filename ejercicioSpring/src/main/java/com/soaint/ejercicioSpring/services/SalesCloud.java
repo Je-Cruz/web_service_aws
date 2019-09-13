@@ -123,7 +123,7 @@ public class SalesCloud {
 		HttpPost request = new HttpPost(UrlPostContact());
 		credential(request);
 		StringEntity entity = new StringEntity(serializeContact(person), ContentType.APPLICATION_JSON);
-		HttpResponse response = connectionHttp.ConnectionResponse(request, entity);
+		connectionHttp.ConnectionResponse(request, entity);
 	}
 
 	// POST SAVE SALES LEAD
@@ -174,10 +174,14 @@ public class SalesCloud {
 	
 	public String checkExistenceForDeleteByEmail (String email) throws ClientProtocolException, IOException {
 		ArrayList<Integer> idSalesCloud = getContactPartyNumberByEmail(email);
+		String leadExist = ", no tenía ningún Lead asociado";
      	if (!idSalesCloud.isEmpty()) {
-     		deleteLead(getLeadByContactPartyNumber(email));
+     		if(!getLeadByContactPartyNumber(email).isEmpty()) {
+     			deleteLead(getLeadByContactPartyNumber(email));
+     			leadExist = ", con Lead asociado";
+     		}
      		deleteContact(idSalesCloud);
-     		return "ELIMINADO de Sales Cloud<br>";
+     		return "ELIMINADO de Sales Cloud".concat(leadExist).concat("<br>");
      	} else {
      		return "No existe en Sales Cloud<br>";
      	}
@@ -192,7 +196,7 @@ public class SalesCloud {
 				postSalesLeadSave(email);
 				leadExist = ", se crea y asocia Lead";
 			}
-     		return "Ya existe en Sales Cloud"+ leadExist +"<br>";
+     		return "Ya existe en Sales Cloud".concat(leadExist).concat("<br>");
      	} else {
      		postContactSave(contactJson);
      		postSalesLeadSave(email);

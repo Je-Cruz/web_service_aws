@@ -31,18 +31,18 @@ public class RightNow {
 		
 	// QUERY DE ORACLE SERVICE CLOUD (RIGHT NOW)
 	private String QueryId(String email) {
-		return "https://" + PropertiesReader.getCredRightNow() + "@" + 
-				PropertiesReader.urlRightNow() + PropertiesReader.getUrlQueryRightNow() + "'" + email + "'";
+		return "https://" + PropertiesReader.getCredRightNow().concat("@")
+				.concat(PropertiesReader.urlRightNow()).concat(PropertiesReader.getUrlQueryRightNow()).concat("'").concat(email).concat("'");
 	}
 	
 	// URLS DE ORACLE SERVICE CLOUD (RIGHT NOW)
 	private String UrlGet(int id) {
-		return "https://" + PropertiesReader.getCredRightNow() + "@" + 
-				PropertiesReader.urlRightNow() + PropertiesReader.getUrlRightNow() + id;
+		return "https://" + PropertiesReader.getCredRightNow().concat("@")
+				.concat(PropertiesReader.urlRightNow()).concat(PropertiesReader.getUrlRightNow()) + id;
 	}
 	private String UrlPost() {
-		return "https://" + PropertiesReader.getCredRightNow() + "@" + 
-				PropertiesReader.urlRightNow() + PropertiesReader.postUrlRightNow();
+		return "https://" + PropertiesReader.getCredRightNow().concat("@")
+				.concat(PropertiesReader.urlRightNow()).concat(PropertiesReader.postUrlRightNow());
 	}
 	//------------------------
 	
