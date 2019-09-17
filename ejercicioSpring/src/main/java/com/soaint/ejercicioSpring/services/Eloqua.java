@@ -9,6 +9,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.soaint.ejercicioSpring.model.eloqua.ContactsEloqua;
@@ -21,6 +23,7 @@ import com.soaint.ejercicioSpring.utils.UriReplace;
  * @author jcruz
  *
  */
+@Service
 public class Eloqua {
 	
 	ConnectionHttp connectionHttp = new ConnectionHttp();
