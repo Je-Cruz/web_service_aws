@@ -1,6 +1,8 @@
 package com.soaint.ejercicioSpring.services;
 
 import java.io.IOException;
+
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -19,51 +21,72 @@ import com.soaint.ejercicioSpring.security.PropertiesReader;
 import com.soaint.ejercicioSpring.services.connection.ConnectionHttp;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+import repository.InterfaceServices;
+
 /**
  * 
  * @author jcruz
  *
  */
 @Service
-public class RightNow {
+public class RightNow implements InterfaceServices {
     
+	
 	ConnectionHttp connectionHttp = new ConnectionHttp();
-	UriReplace uriReplace = new UriReplace();
 		
+	// CREDENCIALES DE ELOQUA
+    private HttpGet credential(HttpGet request) {
+    	request.setHeader(HttpHeaders.AUTHORIZATION,
+    			PropertiesReader.getCredRightNow());
+    	return request;
+    }
+    private HttpPost credential(HttpPost request) {
+    	request.setHeader(HttpHeaders.AUTHORIZATION,
+    			PropertiesReader.getCredRightNow());
+    	return request;
+    }
+    private HttpDelete credential(HttpDelete request) {
+    	request.setHeader(HttpHeaders.AUTHORIZATION,
+    			PropertiesReader.getCredRightNow());
+    	return request;
+    }
+	
 	// QUERY DE ORACLE SERVICE CLOUD (RIGHT NOW)
 	private String QueryId(String email) {
-		return "https://" + PropertiesReader.getCredRightNow().concat("@")
-				.concat(PropertiesReader.urlRightNow()).concat(PropertiesReader.getUrlQueryRightNow()).concat("'").concat(email).concat("'");
+		return PropertiesReader.urlRightNow().concat(PropertiesReader.getUrlQueryRightNow()).concat("'").concat(email).concat("'");
 	}
 	
 	// URLS DE ORACLE SERVICE CLOUD (RIGHT NOW)
 	private String UrlGet(int id) {
-		return "https://" + PropertiesReader.getCredRightNow().concat("@")
-				.concat(PropertiesReader.urlRightNow()).concat(PropertiesReader.getUrlRightNow()) + id;
+		return PropertiesReader.urlRightNow().concat(PropertiesReader.getUrlRightNow()) + id;
 	}
 	private String UrlPost() {
-		return "https://" + PropertiesReader.getCredRightNow().concat("@")
-				.concat(PropertiesReader.urlRightNow()).concat(PropertiesReader.postUrlRightNow());
+		return PropertiesReader.urlRightNow().concat(PropertiesReader.postUrlRightNow());
 	}
 	//------------------------
 	
 	// GET ID DE CONTACTS
 	public int getContactIdByEmail(String email) {
         HttpGet request = new HttpGet(QueryId(email));
-        
+        credential(request);
         try {
     	    String jsonResponse = connectionHttp.ConnectionResponse(request);    	    
     		ObjectMapper om = new ObjectMapper();
-    		JsonNode nodes = om.readTree(jsonResponse).get("items");
-    		return nodes.get(0).get("id").asInt();
-        }catch(Exception e) {
+    		JsonNode nodes = om.readTree(jsonResponse).get(PropertiesReader.stringItems());
+    		return nodes.get(0).get(PropertiesReader.stringId()).asInt();
+        }catch (ClientProtocolException e) {
         	return 0;
-        }
+        }catch (IOException e) {
+        	return 0;
+		}catch (NullPointerException e) {
+        	return 0;
+		}
 	}
 	
 	// POST SAVE CONTACT
 	public void postContactSave(String person) throws ClientProtocolException, IOException {
 		HttpPost request = new HttpPost(UrlPost());
+		credential(request);
         StringEntity entity = new StringEntity(serializeContact(person),
                 ContentType.APPLICATION_JSON);
         connectionHttp.ConnectionResponse(request, entity);
@@ -72,17 +95,18 @@ public class RightNow {
 	// DELETE CONTACT
     public void deleteContact(int id) throws ClientProtocolException, IOException {
     	HttpDelete request = new HttpDelete(UrlGet(id));
+    	credential(request);
         connectionHttp.ConnectionResponse(request);	
     }
     
 	public String serializeContact(String person) throws IOException {
 		ObjectMapper obj = new ObjectMapper();
 		JsonNode actualObj = obj.readTree(person);
-		Name namern = new Name(uriReplace.JsonTransformer(actualObj.get("nombre").asText()),
-				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()));
+		Name name = new Name(UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringNombre()).asText()),
+				UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringApellidos()).asText()));
 		AddressType addressType = new AddressType(0);
-		Emails emailsrn = new Emails(uriReplace.JsonTransformer(actualObj.get("correo").asText()),addressType);
-		ContactsRightNow contact = new ContactsRightNow(namern,emailsrn);
+		Emails email = new Emails(UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringCorreo()).asText()),addressType);
+		ContactsRightNow contact = new ContactsRightNow(name,email);
 		
 		return obj.writeValueAsString(contact).toString();
 	}
@@ -91,21 +115,21 @@ public class RightNow {
 		int idRightNow = getContactIdByEmail(email);
 		if (idRightNow > 0) {
      		deleteContact(idRightNow);
-     		return "ELIMINADO de Right Now<br>";
+     		return "ELIMINADO de Service Cloud<br>";
      	} else {
-     		return "No existe en Right Now<br>";
+     		return "No existe en Service Cloud<br>";
      	}
 	}
 	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
     	ObjectMapper om = new ObjectMapper();
-		JsonNode nodes = om.readTree(contactJson).get("correo");
-		String email = uriReplace.JsonTransformer(nodes.asText());
+		JsonNode nodes = om.readTree(contactJson).get(PropertiesReader.stringCorreo());
+		String email = UriReplace.JsonTransformer(nodes.asText());
     	
     	if (getContactIdByEmail(email) > 0) {
-    		return "Ya existe en Right Now<br>";
+    		return "Ya existe en Service Cloud<br>";
      	} else {
      		postContactSave(contactJson);
-     		return "Creado en Right Now<br>";
+     		return "Creado en Service Cloud<br>";
      	}
 	}
 }

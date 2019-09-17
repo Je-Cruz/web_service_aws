@@ -10,7 +10,7 @@ import com.soaint.ejercicioSpring.utils.EncoderBase64;
  *
  */
 public class PropertiesReader {
-	private static final ResourceBundle PROPERTIES = ResourceBundle.getBundle("application");
+	private static final ResourceBundle PROPERTIES = ResourceBundle.getBundle("aquiNoEstanLasCredenciales/UrlStrings");
 	// ORACLE RIGHT NOW *************************************
 	public static String urlRightNow(){
 	    return PROPERTIES.getString("URL.RightNow");
@@ -25,7 +25,7 @@ public class PropertiesReader {
 	    return PROPERTIES.getString("URL.RightNow.Query");
 	}
 	public static String getCredRightNow(){
-	    return PROPERTIES.getString("Credential.RightNow");
+		return "Basic "+EncoderBase64.encoderBase64(PROPERTIES.getString("Credential.RightNow"));
 	}
 	
 	// ORACLE ELOQUA *****************************************
@@ -68,4 +68,32 @@ public class PropertiesReader {
 		return "Basic "+EncoderBase64.encoderBase64(PROPERTIES.getString("Credential.SalesCloud"));
 	}
 	
+	// ****************************************************
+	public static String stringId(){
+	    return PROPERTIES.getString("StringStatic.Id");
+	}
+	public static String stringItems(){
+	    return PROPERTIES.getString("StringStatic.Items");
+	}
+	public static String stringElements(){
+	    return PROPERTIES.getString("StringStatic.Elements");
+	}
+	public static String stringPartyNumber(){
+	    return PROPERTIES.getString("StringStatic.PartyNumber");
+	}
+	public static String stringLeadId(){
+	    return PROPERTIES.getString("StringStatic.LeadId");
+	}
+	public static String stringContactPartyNumber(){
+	    return PROPERTIES.getString("StringStatic.ContactPartyNumber");
+	}
+	public static String stringNombre(){
+	    return PROPERTIES.getString("StringStatic.Nombre");
+	}
+	public static String stringApellidos(){
+	    return PROPERTIES.getString("StringStatic.Apellidos");
+	}
+	public static String stringCorreo(){
+	    return PROPERTIES.getString("StringStatic.Correo");
+	}
 }

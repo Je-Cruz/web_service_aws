@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.soaint.ejercicioSpring.services.Eloqua;
-import com.soaint.ejercicioSpring.services.RightNow;
 import com.soaint.ejercicioSpring.services.SalesCloud;
-import com.soaint.ejercicioSpring.utils.UriReplace;
+
+import repository.InterfaceServices;
 
 /**
  * 
@@ -26,10 +27,14 @@ import com.soaint.ejercicioSpring.utils.UriReplace;
 @RequestMapping("/conexion")
 public class EjemploController {
     
-    RightNow rightNow = new RightNow();
-    Eloqua eloqua = new Eloqua();
-    SalesCloud salesCloud = new SalesCloud();
-    UriReplace uriReplace = new UriReplace();
+	@Autowired
+    InterfaceServices rightNow;
+	
+	@Autowired
+    Eloqua eloqua;
+    
+	@Autowired
+    SalesCloud salesCloud;
     
     /**
      * Conecta con las API de Oracle Service Cloud (Right Now), Eloqua, Oracle Sales Cloud.

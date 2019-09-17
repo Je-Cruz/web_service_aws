@@ -18,16 +18,17 @@ import com.soaint.ejercicioSpring.security.PropertiesReader;
 import com.soaint.ejercicioSpring.services.connection.ConnectionHttp;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+import repository.InterfaceServices;
+
 /**
  * 
  * @author jcruz
  *
  */
 @Service
-public class Eloqua {
+public class Eloqua implements InterfaceServices {
 	
 	ConnectionHttp connectionHttp = new ConnectionHttp();
-	UriReplace uriReplace = new UriReplace();
 	
 	// CREDENCIALES DE ELOQUA
     private HttpGet credential(HttpGet request) {
@@ -57,20 +58,24 @@ public class Eloqua {
 	}
 
 	// GET ID DE CONTACTS
-	public int getContactIdByEmail(String email) throws ClientProtocolException, IOException {
+	public int getContactIdByEmail(String email) {
 		HttpGet request = new HttpGet(QueryId(email));
         credential(request);
         try {
         	String jsonResponse = connectionHttp.ConnectionResponse(request);    	    
     		ObjectMapper om = new ObjectMapper();
-    		JsonNode nodes = om.readTree(jsonResponse).get("elements");
+    		JsonNode nodes = om.readTree(jsonResponse).get(PropertiesReader.stringElements());
     		return nodes.get(0).get("id").asInt();
-        }catch(Exception e) {
+        }catch (ClientProtocolException e) {
         	return 0;
-        }
+        }catch (IOException e) {
+        	return 0;
+		}catch (NullPointerException e) {
+        	return 0;
+		}
 	}
 	
-	// HTTP POST para crear contacto
+	// POST SAVE CONTACT
 	public void postContactSave(String person) throws ClientProtocolException, IOException {
 		HttpPost request = new HttpPost(PropertiesReader.urlEloqua() + PropertiesReader.postUrlEloqua());
         credential(request);
@@ -79,7 +84,7 @@ public class Eloqua {
         connectionHttp.ConnectionResponse(request, entity);
 	}
     
-	// HTTP DELETE request
+	// DELETE CONTACT
     public void deleteContact(int id) throws ClientProtocolException, IOException {
         HttpDelete request = new HttpDelete(UrlGet(id));
         credential(request);
@@ -89,9 +94,9 @@ public class Eloqua {
 	public String serializeContact(String person) throws IOException {
 		ObjectMapper om = new ObjectMapper();
 		JsonNode actualObj = om.readTree(person);
-		ContactsEloqua contact = new ContactsEloqua(uriReplace.JsonTransformer(actualObj.get("nombre").asText()),
-				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
-				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
+		ContactsEloqua contact = new ContactsEloqua(UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringNombre()).asText()),
+				UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringApellidos()).asText()),
+				UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringCorreo()).asText()));
 		return om.writeValueAsString(contact).toString();
 	}
 	
@@ -106,12 +111,12 @@ public class Eloqua {
 	}
 	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
     	ObjectMapper om = new ObjectMapper();
-		JsonNode nodes = om.readTree(contactJson).get("correo");
-		String email = uriReplace.JsonTransformer(nodes.asText());
+		JsonNode nodes = om.readTree(contactJson).get(PropertiesReader.stringCorreo());
+		String email = UriReplace.JsonTransformer(nodes.asText());
     	
      	if (getContactIdByEmail(email) > 0) {
      		return "Ya existe en Eloqua<br>";
-     	} else {
+     	} else { 
      		postContactSave(contactJson);
      		return "Creado en Eloqua<br>";
      	}

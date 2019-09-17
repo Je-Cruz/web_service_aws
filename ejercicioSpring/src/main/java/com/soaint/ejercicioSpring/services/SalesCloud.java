@@ -21,6 +21,8 @@ import com.soaint.ejercicioSpring.security.PropertiesReader;
 import com.soaint.ejercicioSpring.services.connection.ConnectionHttp;
 import com.soaint.ejercicioSpring.utils.UriReplace;
 
+import repository.InterfaceServices;
+
 /**
  * 
  * @author jcruz
@@ -30,7 +32,6 @@ import com.soaint.ejercicioSpring.utils.UriReplace;
 public class SalesCloud {
 
 	ConnectionHttp connectionHttp = new ConnectionHttp();
-	UriReplace uriReplace = new UriReplace();
 
 	// CREDENCIALES DE SALES CLOUD
 	private HttpGet credential(HttpGet request) {
@@ -74,31 +75,31 @@ public class SalesCloud {
 	//------------------------
 
 	// GET PARTY NUMBERS DE CONTACTS
-	public ArrayList<Integer> getContactPartyNumberByEmail(String email) throws ClientProtocolException, IOException {
+	public ArrayList<Integer> getContactPartyNumberByEmail(String email) {
 		HttpGet request = new HttpGet(QueryContactId(email));
 		credential(request);
-
+		ArrayList<Integer> partyNumbers = new ArrayList<Integer>();
 		try {
 			String jsonResponse = connectionHttp.ConnectionResponse(request);
 			ObjectMapper om = new ObjectMapper();
-			JsonNode nodes = om.readTree(jsonResponse).get("items");
-			ArrayList<Integer> partyNumbers = new ArrayList<Integer>();
-
+			JsonNode nodes = om.readTree(jsonResponse).get(PropertiesReader.stringItems());
+			
 			if (nodes.isArray()) {
 				for (JsonNode objNode : nodes) {
-					partyNumbers.add(objNode.get("PartyNumber").asInt());
+					partyNumbers.add(objNode.get(PropertiesReader.stringPartyNumber()).asInt());
 				}
 			}
 
 			return partyNumbers;
 		} catch (IOException e) {
-			return null;
-		}
+			return partyNumbers;
+		} catch (NullPointerException e) {
+				return partyNumbers;
+			}
 	}
 
 	// GET LEAD-ID DE SALES LEAD
-	public ArrayList<String> getLeadByContactPartyNumber(String email)
-			throws ClientProtocolException, IOException {
+	public ArrayList<String> getLeadByContactPartyNumber(String email) {
 
 		HttpGet request = new HttpGet(QueryLeadId(email));
 		credential(request);
@@ -106,11 +107,11 @@ public class SalesCloud {
 		try {
 			String jsonResponse = connectionHttp.ConnectionResponse(request);
 			ObjectMapper om = new ObjectMapper();
-			JsonNode nodes = om.readTree(jsonResponse).get("items");
+			JsonNode nodes = om.readTree(jsonResponse).get(PropertiesReader.stringItems());
 			ArrayList<String> leadsIdArrayList = new ArrayList<String>();
 			if (nodes.isArray()) {
 				for (JsonNode objNode : nodes) {
-					leadsIdArrayList.add(objNode.get("LeadId").asText());
+					leadsIdArrayList.add(objNode.get(PropertiesReader.stringLeadId()).asText());
 				}
 			}
 			return leadsIdArrayList;
@@ -160,16 +161,16 @@ public class SalesCloud {
 	public String serializeContact(String person) throws IOException {
 		ObjectMapper obj = new ObjectMapper();
 		JsonNode actualObj = obj.readTree(person);
-		ContactsOSC contact = new ContactsOSC(uriReplace.JsonTransformer(actualObj.get("nombre").asText()), 
-				uriReplace.JsonTransformer(actualObj.get("apellidos").asText()),
-				uriReplace.JsonTransformer(actualObj.get("correo").asText()));
+		ContactsOSC contact = new ContactsOSC(UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringNombre()).asText()), 
+				UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringApellidos()).asText()),
+				UriReplace.JsonTransformer(actualObj.get(PropertiesReader.stringCorreo()).asText()));
 		return obj.writeValueAsString(contact).toString();
 	}
 	
 	public String serializeLead(String jsonLead) throws IOException {
 		ObjectMapper obj = new ObjectMapper();
 		JsonNode actualObj = obj.readTree(jsonLead);
-		SalesLead contact = new SalesLead(actualObj.get("ContactPartyNumber").asInt());
+		SalesLead contact = new SalesLead(actualObj.get(PropertiesReader.stringContactPartyNumber()).asInt());
 		return obj.writeValueAsString(contact).toString();
 	}
 	
@@ -187,21 +188,29 @@ public class SalesCloud {
      		return "No existe en Sales Cloud<br>";
      	}
 	}
-	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
+	public String checkExistenceForCreateByJson (String contactJson){
     	ObjectMapper om = new ObjectMapper();
-		JsonNode nodes = om.readTree(contactJson).get("correo");
-		String email = uriReplace.JsonTransformer(nodes.asText());
-    	String leadExist = ", con Lead asociado";
-		if (!getContactPartyNumberByEmail(email).isEmpty()) {
-			if(getLeadByContactPartyNumber(email).isEmpty()) {
-				postSalesLeadSave(email);
-				leadExist = ", se crea y asocia Lead";
-			}
-     		return "Ya existe en Sales Cloud".concat(leadExist).concat("<br>");
-     	} else {
-     		postContactSave(contactJson);
-     		postSalesLeadSave(email);
-     		return "Creado en Sales Cloud y añadido Lead<br>";
-     	}
+		JsonNode nodes;
+		try {
+			
+			nodes = om.readTree(contactJson).get("correo");
+			String email = UriReplace.JsonTransformer(nodes.asText());
+	    	String leadExist = ", con Lead asociado";
+			if (!getContactPartyNumberByEmail(email).isEmpty()) {
+				if(getLeadByContactPartyNumber(email).isEmpty()) {
+					postSalesLeadSave(email);
+					leadExist = ", se crea y asocia Lead";
+				}
+	     		return "Ya existe en Sales Cloud".concat(leadExist).concat("<br>");
+	     	} else {
+	     		postContactSave(contactJson);
+	     		postSalesLeadSave(email);
+	     		return "Creado en Sales Cloud y añadido Lead<br>";
+	     	}
+		
+		} catch (IOException e) {
+			return "Error al crear en Sales Cloud<br>";
+		}
+
 	}
 }
