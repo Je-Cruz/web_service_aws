@@ -9,6 +9,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -109,17 +111,24 @@ public class Eloqua implements InterfaceServices {
      		return "No existe en Eloqua<br>";
      	}
 	}
-	public String checkExistenceForCreateByJson (String contactJson) throws ClientProtocolException, IOException {
+	public ResponseEntity<String> checkExistenceForCreateByJson (String contactJson) {
     	ObjectMapper om = new ObjectMapper();
-		JsonNode nodes = om.readTree(contactJson).get(PropertiesReader.stringCorreo());
-		String email = UriReplace.JsonTransformer(nodes.asText());
-    	
-     	if (getContactIdByEmail(email) > 0) {
-     		return "Ya existe en Eloqua<br>";
-     	} else { 
-     		postContactSave(contactJson);
-     		return "Creado en Eloqua<br>";
-     	}
+		JsonNode nodes;
+		try {
+			nodes = om.readTree(contactJson).get(PropertiesReader.stringCorreo());
+			String email = UriReplace.JsonTransformer(nodes.asText());
+	    	
+	     	if (getContactIdByEmail(email) > 0) {
+	     		return new ResponseEntity<>("Ya existe en Eloqua<br>", HttpStatus.OK);
+	     	} else { 
+	     		postContactSave(contactJson);
+	     		return new ResponseEntity<>("Creado en Eloqua<br>", HttpStatus.CREATED);
+	     	}
+			
+		} catch (IOException e) {
+			return new ResponseEntity<>("Error al crear en Eloqua<br>", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
     
 }

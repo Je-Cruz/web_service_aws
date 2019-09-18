@@ -66,10 +66,22 @@ public class EjemploController {
      */
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
     public ResponseEntity<String> create(@RequestBody String contactJson) throws  ClientProtocolException, IOException {
-    	String resultado = rightNow.checkExistenceForCreateByJson(contactJson)
-    			.concat(eloqua.checkExistenceForCreateByJson(contactJson))
-    					.concat(salesCloud.checkExistenceForCreateByJson(contactJson));
-		return new ResponseEntity<>(resultado, HttpStatus.OK);
+    	int statusServiceCloud = Integer.parseInt(rightNow.checkExistenceForCreateByJson(contactJson).getStatusCode().toString());
+    	int statusEloqua = Integer.parseInt(eloqua.checkExistenceForCreateByJson(contactJson).getStatusCode().toString());
+    	int statusSalesCloud = Integer.parseInt(salesCloud.checkExistenceForCreateByJson(contactJson).getStatusCode().toString());
+    	
+    	String resultado = rightNow.checkExistenceForCreateByJson(contactJson).getBody()
+    			.concat(eloqua.checkExistenceForCreateByJson(contactJson).getBody())
+				.concat(salesCloud.checkExistenceForCreateByJson(contactJson).getBody());
+    	
+    	
+    	if(statusServiceCloud >= 500 || statusEloqua >= 500 || statusSalesCloud >= 500) {
+    		return new ResponseEntity<>(resultado, HttpStatus.INTERNAL_SERVER_ERROR);
+    	}if(statusServiceCloud == 200 || statusEloqua == 200 || statusSalesCloud == 200) {
+    		return new ResponseEntity<>(resultado, HttpStatus.OK);
+    	}else {
+    		return new ResponseEntity<>(resultado, HttpStatus.CREATED);
+    	}
     }
     
 }

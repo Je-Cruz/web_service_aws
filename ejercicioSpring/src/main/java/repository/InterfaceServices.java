@@ -3,6 +3,7 @@ package repository;
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
+import org.springframework.http.ResponseEntity;
 
 public interface InterfaceServices {
 
@@ -19,6 +20,6 @@ public interface InterfaceServices {
 
 	String checkExistenceForDeleteByEmail(String email) throws ClientProtocolException, IOException;
 
-	String checkExistenceForCreateByJson(String contactJson) throws ClientProtocolException, IOException;
+	ResponseEntity<String> checkExistenceForCreateByJson(String contactJson) throws ClientProtocolException, IOException;
 
 }

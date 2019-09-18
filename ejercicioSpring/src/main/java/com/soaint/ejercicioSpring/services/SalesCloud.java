@@ -11,6 +11,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -188,7 +190,7 @@ public class SalesCloud {
      		return "No existe en Sales Cloud<br>";
      	}
 	}
-	public String checkExistenceForCreateByJson (String contactJson){
+	public ResponseEntity<String> checkExistenceForCreateByJson (String contactJson){
     	ObjectMapper om = new ObjectMapper();
 		JsonNode nodes;
 		try {
@@ -201,15 +203,15 @@ public class SalesCloud {
 					postSalesLeadSave(email);
 					leadExist = ", se crea y asocia Lead";
 				}
-	     		return "Ya existe en Sales Cloud".concat(leadExist).concat("<br>");
+				return new ResponseEntity<>("Ya existe en Sales Cloud".concat(leadExist).concat("<br>"), HttpStatus.OK);
 	     	} else {
 	     		postContactSave(contactJson);
 	     		postSalesLeadSave(email);
-	     		return "Creado en Sales Cloud y añadido Lead<br>";
+	     		return new ResponseEntity<>("Creado en Sales Cloud y añadido Lead<br>", HttpStatus.CREATED);
 	     	}
 		
 		} catch (IOException e) {
-			return "Error al crear en Sales Cloud<br>";
+			return new ResponseEntity<>("Error al crear en Sales Cloud<br>", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}
